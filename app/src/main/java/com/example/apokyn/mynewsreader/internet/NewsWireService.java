@@ -2,35 +2,37 @@ package com.example.apokyn.mynewsreader.internet;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.apokyn.mynewsreader.Parser;
-import com.example.apokyn.mynewsreader.entity.NewsWireItem;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by apokyn on 25.08.2015.
  */
 public class NewsWireService extends IntentService {
+    /* Broadcast */
+    public static final String ACTION_NEWS_WIRE_UPDATE = "actionNewsWireUpdate";
+    public static final String KEY_NEWS_WIRE_RESULT_JSON = "news";
+    public static final String KEY_IS_NEWS_LOADED = "isNewsWireUpdated";
 
     private static final String NEWS_WIRE_API_KEY = "ce28bf606898b473be1a4cdd17ee165a%3A16%3A72738095";
     private String url = "http://api.nytimes.com/svc/news/v3/content/all/all/.json?api-key=" + NEWS_WIRE_API_KEY;
-    private NewsWireListener mNewsListeners;
+
+    private String mLogTag = getClass().getSimpleName();
     private OkHttpClient mHttpClient;
+    private LocalBroadcastManager mBroadcastManager;
 
-    private String mTag = getClass().getSimpleName();
+    public NewsWireService() {
+        this("Worker thread");
+    }
 
-    public interface NewsWireListener {
-        void onNewsWireUpdated(String section, List<NewsWireItem> news);
+    public NewsWireService(String name) {
+        super(name);
     }
 
     @Override
@@ -38,59 +40,38 @@ public class NewsWireService extends IntentService {
         super.onCreate();
 
         mHttpClient = new OkHttpClient();
-    }
-
-    public NewsWireService() {
-        this("Worker thread");
-    }
-
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public NewsWireService(String name) {
-        super(name);
+        mBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        JSONObject jsonObject = run(url);
+        String resultJSON = runRequest(url);
+        boolean isResultOk = resultJSON != null;
+        Intent resultIntent = new Intent();
 
-        if (jsonObject != null) {
-            List<NewsWireItem> newsWireItems = Parser.parseNewsWireItems(jsonObject);
+        resultIntent.setAction(ACTION_NEWS_WIRE_UPDATE);
+        resultIntent.putExtra(KEY_IS_NEWS_LOADED, isResultOk);
+        resultIntent.putExtra(KEY_NEWS_WIRE_RESULT_JSON, isResultOk ? resultJSON : null);
 
-            for (NewsWireItem item : newsWireItems) {
-                Log.d(mTag, "Title : " + item.getTitle() + " Byline : " + item.getByline() + " Abstract : " + item.getAbstract());
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), "Some error", Toast.LENGTH_SHORT).show();
-            Log.d(mTag, "Some error");
-        }
+        mBroadcastManager.sendBroadcast(resultIntent);
+
+        Log.d(mLogTag, "Service work download : " + isResultOk);
     }
 
-    private JSONObject run(String url) {
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+    private String runRequest(String url) {
+        Request request = new Request.Builder().url(url).build();
 
-        Response response = null;
+        String result = null;
         try {
-            response = mHttpClient.newCall(request).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            Response response = mHttpClient.newCall(request).execute();
 
-        if (response != null) {
-            try {
-                return new JSONObject(response.body().string());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (response != null) {
+                result = response.body().string();
             }
+        } catch (IOException e) {
+            Log.d(mLogTag, e.getMessage());
         }
 
-        return null;
+        return result;
     }
 }
