@@ -10,10 +10,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
-/**
- * Created by apokyn on 25.08.2015.
- */
+
 public class NewsWireService extends IntentService {
     /* Broadcast */
     public static final String ACTION_NEWS_WIRE_UPDATE = "actionNewsWireUpdate";
@@ -46,9 +45,26 @@ public class NewsWireService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Response response = runRequest(url);
+        /* Perform request */
+        Request request = new Request.Builder().url(url).build();
+        Response response = null;
+        String errorMessage = null;
+
+        try {
+            response = mHttpClient.newCall(request).execute();
+        } catch (IOException e) {
+            Log.d(mLogTag, e.getMessage());
+
+            if (e instanceof UnknownHostException) {
+                errorMessage = "Can't connect to server";
+            } else {
+                errorMessage = "Another exception";
+            }
+        }
+
+        /* Build intent */
         Intent resultIntent = new Intent();
-        boolean isSuccessful = response.isSuccessful();
+        boolean isSuccessful = (errorMessage == null);
         String responseJSON = null;
 
         if (isSuccessful) {
@@ -59,25 +75,12 @@ public class NewsWireService extends IntentService {
             }
         }
 
-        Log.d(mLogTag, "onCreate");
         resultIntent.setAction(ACTION_NEWS_WIRE_UPDATE);
         resultIntent.putExtra(KEY_IS_NEWS_LOADED, isSuccessful);
-        resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? response.message() : null);
+        resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? errorMessage : null);
         resultIntent.putExtra(KEY_NEWS_WIRE_RESULT_JSON, (responseJSON != null) ? responseJSON : null);
 
         mBroadcastManager.sendBroadcast(resultIntent);
     }
 
-    private Response runRequest(String url) {
-        Request request = new Request.Builder().url(url).build();
-        Response response = null;
-
-        try {
-            response = mHttpClient.newCall(request).execute();
-        } catch (IOException e) {
-            Log.d(mLogTag, e.getMessage());
-        }
-
-        return response;
-    }
 }

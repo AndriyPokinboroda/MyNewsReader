@@ -7,7 +7,7 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.example.apokyn.mynewsreader.Parser;
+import com.example.apokyn.mynewsreader.utils.Parser;
 import com.example.apokyn.mynewsreader.entity.NewsWireItem;
 import com.example.apokyn.mynewsreader.internet.NewsWireService;
 
@@ -37,8 +37,6 @@ public class DataManager {
         mBroadcastManager.registerReceiver(
                 mNewsWireReceiver,
                 new IntentFilter(NewsWireService.ACTION_NEWS_WIRE_UPDATE));
-
-        Log.d(mLogTag, mLogTag);
     }
 
     //----------------------------------------------------------------------------------------------

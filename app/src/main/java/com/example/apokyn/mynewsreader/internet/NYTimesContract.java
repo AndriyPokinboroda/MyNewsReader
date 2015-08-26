@@ -1,4 +1,4 @@
-package com.example.apokyn.mynewsreader;
+package com.example.apokyn.mynewsreader.internet;
 
 /**
  * Created by apokyn on 25.08.2015.
