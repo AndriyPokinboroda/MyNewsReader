@@ -50,8 +50,7 @@
             <ImageView
                 android:id="@+id/item_thumbnail"
                 android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:background="@drawable/test_thumbnail"/>
+                android:layout_height="45dp"/>
 
         </LinearLayout>
 

@@ -70,15 +70,10 @@ public class Parser {
         return images;
     }
     public static Image parseImage(JSONObject jsonObject) {
-        try {
-            return new Image(
-                    new URL(jsonObject.optString("url")),
-                    jsonObject.optString("caption"),
-                    jsonObject.optString("copyright"));
-        } catch (MalformedURLException e) {
-            Log.d(LOG_TAG, e.getMessage());
-        }
+        return new Image(
+                jsonObject.optString("url"),
+                jsonObject.optString("caption"),
+                jsonObject.optString("copyright"));
 
-        return null;
     }
 }

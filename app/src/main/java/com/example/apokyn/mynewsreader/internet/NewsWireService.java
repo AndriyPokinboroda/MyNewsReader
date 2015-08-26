@@ -59,6 +59,7 @@ public class NewsWireService extends IntentService {
             }
         }
 
+        Log.d(mLogTag, "onCreate");
         resultIntent.setAction(ACTION_NEWS_WIRE_UPDATE);
         resultIntent.putExtra(KEY_IS_NEWS_LOADED, isSuccessful);
         resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? response.message() : null);

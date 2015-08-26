@@ -20,8 +20,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NewsWireListener {
 
-    private final String mLogTeg = getClass().getSimpleName();
+    private final String mLogTag = getClass().getSimpleName();
     private DataManager mDataManager;
+    private NewsWireFragment mNewsWireFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +30,10 @@ public class MainActivity extends AppCompatActivity implements NewsWireListener 
         setContentView(R.layout.activity_main);
 
         mDataManager = NewsReaderApplication.getDataManager();
+        mNewsWireFragment =  new NewsWireFragment();
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.fragment_container, new NewsWireFragment());
+        transaction.add(R.id.fragment_container, mNewsWireFragment);
         transaction.commit();
     }
 
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NewsWireListener 
     @Override
     public void onNewsUpdated(String section, List<NewsWireItem> freshNews) {
         Toast.makeText(this, "All is OK", Toast.LENGTH_SHORT).show();
-
+        mNewsWireFragment.appendNews(freshNews);
     }
 
     @Override

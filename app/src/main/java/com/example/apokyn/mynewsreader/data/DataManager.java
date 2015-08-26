@@ -37,15 +37,13 @@ public class DataManager {
         mBroadcastManager.registerReceiver(
                 mNewsWireReceiver,
                 new IntentFilter(NewsWireService.ACTION_NEWS_WIRE_UPDATE));
-        /* TEMPORARY */
-        mContext.startService(new Intent(mContext, NewsWireService.class));
 
         Log.d(mLogTag, mLogTag);
     }
 
-    //---------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
     // Observer
-    //---------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
     public void registerNewsWireListener(NewsWireListener listener) {
         mNewsWireListeners.add(listener);
     }
@@ -65,7 +63,7 @@ public class DataManager {
             listener.onNewsUpdateFailed(message);
         }
     }
-    //---------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public void updateNewsWire(String section) {
         mContext.startService(new Intent(mContext, NewsWireService.class));

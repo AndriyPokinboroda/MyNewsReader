@@ -8,45 +8,35 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.apokyn.mynewsreader.entity.Image;
 import com.example.apokyn.mynewsreader.entity.NewsWireItem;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by apokyn on 25.08.2015.
- */
+
 public class NewsWireFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
+    private CustomAdapter mAdapter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRecyclerView = new RecyclerView(getActivity());
-
+        mAdapter = new CustomAdapter(null);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-
-        List<NewsWireItem> news = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            news.add(new NewsWireItem(
-                    "Very loooo ooooooooooooo oooooooooooo oooooooong Title",
-                    null,
-                    "BYLINE",
-                    "Some abstract text",
-                    new Image(
-                            null,
-                            null,
-                            null)));
-        }
-        mRecyclerView.setAdapter(new CustomAdapter(news));
-
+        mRecyclerView.setAdapter(mAdapter);
 
         return mRecyclerView;
+    }
+
+    public void appendNews(List<NewsWireItem> news) {
+        mAdapter.addNews(news);
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
@@ -55,9 +45,20 @@ public class NewsWireFragment extends Fragment {
         private List<NewsWireItem> mNews;
 
         public CustomAdapter(List<NewsWireItem> news) {
-            mNews = news;
+            if (news != null) {
+                mNews = news;
+            } else {
+                mNews = new ArrayList<>();
+            }
 
             mInflater = LayoutInflater.from(NewsWireFragment.this.getActivity());
+        }
+
+        public void addNews(List<NewsWireItem> news) {
+            if (!mNews.containsAll(news)) {
+                mNews.addAll(news);
+                notifyDataSetChanged();
+            }
         }
 
         @Override
@@ -72,6 +73,10 @@ public class NewsWireFragment extends Fragment {
             viewHolder.titleView.setText(mNews.get(index).getTitle());
             viewHolder.bylineView.setText(mNews.get(index).getByline());
             viewHolder.abstractView.setText(mNews.get(index).getAbstract());
+
+            if (mNews.get(index).getPhoto() != null) {
+                Picasso.with(getActivity()).load(mNews.get(index).getPhoto().getImage()).into(viewHolder.thumbnailView);
+            }
         }
 
         @Override
@@ -84,6 +89,7 @@ public class NewsWireFragment extends Fragment {
             public TextView titleView;
             public TextView bylineView;
             public TextView abstractView;
+            public ImageView thumbnailView;
 
             public ViewHolder(View contentView) {
                 super(contentView);
@@ -91,6 +97,7 @@ public class NewsWireFragment extends Fragment {
                 titleView = (TextView) contentView.findViewById(R.id.item_title);
                 bylineView = (TextView) contentView.findViewById(R.id.item_byline);
                 abstractView = (TextView) contentView.findViewById(R.id.item_abstract);
+                thumbnailView = (ImageView) contentView.findViewById(R.id.item_thumbnail);
             }
         }
     }
