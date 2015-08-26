@@ -1,20 +1,13 @@
 package com.example.apokyn.mynewsreader;
 
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.apokyn.mynewsreader.data.DataManager;
 import com.example.apokyn.mynewsreader.data.NewsWireListener;
 import com.example.apokyn.mynewsreader.entity.NewsWireItem;
-import com.example.apokyn.mynewsreader.internet.NewsWireService;
 
 import java.util.List;
 

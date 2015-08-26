@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 
-public class NewsWireService extends IntentService {
+public class DownloadService extends IntentService {
     /* Intent required extras */
     public static final String KEY_BROADCAST_ACTION = "broadcastAction";
     public static final String KEY_URL = "requestUrl";
@@ -27,11 +27,11 @@ public class NewsWireService extends IntentService {
     private OkHttpClient mHttpClient;
     private LocalBroadcastManager mBroadcastManager;
 
-    public NewsWireService() {
+    public DownloadService() {
         this("Worker thread");
     }
 
-    public NewsWireService(String name) {
+    public DownloadService(String name) {
         super(name);
     }
 

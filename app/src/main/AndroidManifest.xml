@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".internet.NewsWireService"/>
+        <service android:name=".internet.DownloadService"/>
 
     </application>
 

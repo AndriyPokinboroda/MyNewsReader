@@ -1,6 +1,7 @@
 package com.example.apokyn.mynewsreader;
 
 import android.app.Fragment;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +24,10 @@ public class NewsWireFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private CustomAdapter mAdapter;
 
+//    Typeface mCheltenhamBold;
+//    Typeface mCheltenham;
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,6 +37,8 @@ public class NewsWireFragment extends Fragment {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
+//        mCheltenhamBold = Typeface.createFromAsset(getActivity().getAssets(), "font/cheltenham-bold.ttf");
+//        mCheltenham = Typeface.createFromAsset(getActivity().getAssets(), "font/cheltenham.ttf");
         return mRecyclerView;
     }
 
@@ -74,6 +81,8 @@ public class NewsWireFragment extends Fragment {
             viewHolder.bylineView.setText(mNews.get(index).getByline());
             viewHolder.abstractView.setText(mNews.get(index).getAbstract());
 
+
+
             if (mNews.get(index).getPhoto() != null) {
                 Picasso.with(getActivity()).load(mNews.get(index).getPhoto().getImage()).into(viewHolder.thumbnailView);
             }
@@ -98,6 +107,10 @@ public class NewsWireFragment extends Fragment {
                 bylineView = (TextView) contentView.findViewById(R.id.item_byline);
                 abstractView = (TextView) contentView.findViewById(R.id.item_abstract);
                 thumbnailView = (ImageView) contentView.findViewById(R.id.item_thumbnail);
+
+//                titleView.setTypeface(mCheltenhamBold);
+//                bylineView.setTypeface(mCheltenham);
+//                abstractView.setTypeface(mCheltenham);
             }
         }
     }
