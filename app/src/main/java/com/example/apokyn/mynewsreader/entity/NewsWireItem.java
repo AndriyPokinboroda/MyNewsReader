@@ -7,13 +7,13 @@ import java.net.URL;
  */
 public class NewsWireItem {
 
-    private URL mUrl;
+    private String mUrl;
     private String mTitle;
     private String mByline;
     private String mAbstract;
     private Image mImage;
 
-    public NewsWireItem(String title, URL url, String byline, String abstractText, Image image) {
+    public NewsWireItem(String title, String url, String byline, String abstractText, Image image) {
         mUrl = url;
         mTitle = title;
         mByline = byline;
@@ -26,7 +26,7 @@ public class NewsWireItem {
         return mTitle;
     }
 
-    public URL getUrl() {
+    public String getUrl() {
         return mUrl;
     }
 

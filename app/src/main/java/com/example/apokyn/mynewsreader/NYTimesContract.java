@@ -23,7 +23,12 @@ public class NYTimesContract {
         public static final String FIELD_ABSTRACT = "abstract";
         public static final String FIELD_URL = "url";
         public static final String FIELD_BYLINE = "byline";
-        public static final String FIELD_RESAULTS = "results";
+        public static final String FIELD_RESULTS = "results";
+
+    }
+
+    public static class Multimedia {
+        public static final String FIELD_MULTIMEDIA = "multimedia";
 
     }
 }

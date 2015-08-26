@@ -19,6 +19,7 @@ public class NewsWireService extends IntentService {
     public static final String ACTION_NEWS_WIRE_UPDATE = "actionNewsWireUpdate";
     public static final String KEY_NEWS_WIRE_RESULT_JSON = "news";
     public static final String KEY_IS_NEWS_LOADED = "isNewsWireUpdated";
+    public static final String KEY_ERROR_MESSAGE = "errorMessage";
 
     private static final String NEWS_WIRE_API_KEY = "ce28bf606898b473be1a4cdd17ee165a%3A16%3A72738095";
     private String url = "http://api.nytimes.com/svc/news/v3/content/all/all/.json?api-key=" + NEWS_WIRE_API_KEY;
@@ -45,33 +46,37 @@ public class NewsWireService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        String resultJSON = runRequest(url);
-        boolean isResultOk = resultJSON != null;
+        Response response = runRequest(url);
         Intent resultIntent = new Intent();
+        boolean isSuccessful = response.isSuccessful();
+        String responseJSON = null;
+
+        if (isSuccessful) {
+            try {
+                responseJSON = response.body().string();
+            } catch (IOException e) {
+                Log.d(mLogTag, e.getMessage());
+            }
+        }
 
         resultIntent.setAction(ACTION_NEWS_WIRE_UPDATE);
-        resultIntent.putExtra(KEY_IS_NEWS_LOADED, isResultOk);
-        resultIntent.putExtra(KEY_NEWS_WIRE_RESULT_JSON, isResultOk ? resultJSON : null);
+        resultIntent.putExtra(KEY_IS_NEWS_LOADED, isSuccessful);
+        resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? response.message() : null);
+        resultIntent.putExtra(KEY_NEWS_WIRE_RESULT_JSON, (responseJSON != null) ? responseJSON : null);
 
         mBroadcastManager.sendBroadcast(resultIntent);
-
-        Log.d(mLogTag, "Service work download : " + isResultOk);
     }
 
-    private String runRequest(String url) {
+    private Response runRequest(String url) {
         Request request = new Request.Builder().url(url).build();
+        Response response = null;
 
-        String result = null;
         try {
-            Response response = mHttpClient.newCall(request).execute();
-
-            if (response != null) {
-                result = response.body().string();
-            }
+            response = mHttpClient.newCall(request).execute();
         } catch (IOException e) {
             Log.d(mLogTag, e.getMessage());
         }
 
-        return result;
+        return response;
     }
 }
