@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -19,6 +20,8 @@ import java.util.List;
 
 
 public class DataManager {
+
+    private static final String BROADCAST_ACTION_NEWS_UPDATE = "newsUpdate";
 
     private final String mLogTag = getClass().getSimpleName();
 
@@ -36,7 +39,7 @@ public class DataManager {
 
         mBroadcastManager.registerReceiver(
                 mNewsWireReceiver,
-                new IntentFilter(NewsWireService.ACTION_NEWS_WIRE_UPDATE));
+                new IntentFilter(BROADCAST_ACTION_NEWS_UPDATE));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -62,21 +65,28 @@ public class DataManager {
         }
     }
     //----------------------------------------------------------------------------------------------
-
+    // News Wire Updating
+    //----------------------------------------------------------------------------------------------
     public void updateNewsWire(String section) {
-        mContext.startService(new Intent(mContext, NewsWireService.class));
+        Intent requestIntent = new Intent(mContext, NewsWireService.class);
+        requestIntent.putExtra(
+                NewsWireService.KEY_URL,
+                "http://api.nytimes.com/svc/news/v3/content/all/all/.json?api-key=ce28bf606898b473be1a4cdd17ee165a%3A16%3A72738095");
+        requestIntent.putExtra(NewsWireService.KEY_BROADCAST_ACTION, BROADCAST_ACTION_NEWS_UPDATE);
+
+        mContext.startService(requestIntent);
     }
 
     private class NewsWireReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getBooleanExtra(NewsWireService.KEY_IS_NEWS_LOADED, false)) {
+            if (intent.getBooleanExtra(NewsWireService.KEY_IS_RESULT_OK, false)) {
                 JSONObject newsJSONObj = null;
 
                 try {
                     newsJSONObj = new JSONObject(
-                            intent.getStringExtra(NewsWireService.KEY_NEWS_WIRE_RESULT_JSON));
+                            intent.getStringExtra(NewsWireService.KEY_RESULT_JSON));
                 } catch (JSONException e) {
                     Log.d(mLogTag, e.getMessage());
                 }
@@ -92,4 +102,5 @@ public class DataManager {
             notifyNewsWireUpdateFailed(intent.getStringExtra(NewsWireService.KEY_ERROR_MESSAGE));
         }
     }
+    //----------------------------------------------------------------------------------------------
 }
