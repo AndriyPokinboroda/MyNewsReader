@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.apokyn.mynewsreader.internet.NYTimesContract;
 import com.example.apokyn.mynewsreader.entity.Image;
-import com.example.apokyn.mynewsreader.entity.NewsWireItem;
+import com.example.apokyn.mynewsreader.entity.NewsItem;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,9 +22,9 @@ public class Parser {
 
     private Parser() { }
 
-    public static List<NewsWireItem> parseNewsWireItems(JSONObject jsonObject) {
+    public static List<NewsItem> parseNewsWireItems(JSONObject jsonObject) {
         JSONArray newsWireItems = null;
-        List<NewsWireItem> resultItems = new ArrayList<>();
+        List<NewsItem> resultItems = new ArrayList<>();
         try {
             newsWireItems = jsonObject.getJSONArray(NYTimesContract.NewsWire.FIELD_RESULTS);
 
@@ -40,14 +40,14 @@ public class Parser {
         return resultItems;
     }
 
-    public static NewsWireItem parseNewsWireItem(JSONObject jsonObject) {
+    public static NewsItem parseNewsWireItem(JSONObject jsonObject) {
         List<Image> images = null;
         try {
             images = parseImages(jsonObject.getJSONArray(NYTimesContract.Multimedia.FIELD_MULTIMEDIA));
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return new NewsWireItem(
+        return new NewsItem(
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_TITLE),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_URL),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_BYLINE),

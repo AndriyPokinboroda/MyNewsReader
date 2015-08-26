@@ -5,7 +5,7 @@ import java.net.URL;
 /**
  * Created by apokyn on 25.08.2015.
  */
-public class NewsWireItem {
+public class NewsItem {
 
     private String mUrl;
     private String mTitle;
@@ -13,7 +13,7 @@ public class NewsWireItem {
     private String mAbstract;
     private Image mImage;
 
-    public NewsWireItem(String title, String url, String byline, String abstractText, Image image) {
+    public NewsItem(String title, String url, String byline, String abstractText, Image image) {
         mUrl = url;
         mTitle = title;
         mByline = byline;

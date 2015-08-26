@@ -8,7 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.apokyn.mynewsreader.utils.Parser;
-import com.example.apokyn.mynewsreader.entity.NewsWireItem;
+import com.example.apokyn.mynewsreader.entity.NewsItem;
 import com.example.apokyn.mynewsreader.internet.DownloadService;
 
 import org.json.JSONException;
@@ -52,7 +52,7 @@ public class DataManager {
         mNewsWireListeners.remove(listener);
     }
 
-    private void notifyNewsWireUpdate(String section, List<NewsWireItem> freshNews) {
+    private void notifyNewsWireUpdate(String section, List<NewsItem> freshNews) {
         for (NewsWireListener listener : mNewsWireListeners) {
             listener.onNewsUpdated(section, freshNews);
         }
@@ -91,7 +91,7 @@ public class DataManager {
                 }
 
                 if (newsJSONObj != null) {
-                    List<NewsWireItem> freshNews = Parser.parseNewsWireItems(newsJSONObj);
+                    List<NewsItem> freshNews = Parser.parseNewsWireItems(newsJSONObj);
 
                     notifyNewsWireUpdate(null, freshNews);
                     return;

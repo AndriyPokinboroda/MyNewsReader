@@ -1,7 +1,6 @@
 package com.example.apokyn.mynewsreader;
 
 import android.app.Fragment;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.apokyn.mynewsreader.entity.NewsWireItem;
+import com.example.apokyn.mynewsreader.entity.NewsItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -42,16 +41,16 @@ public class NewsWireFragment extends Fragment {
         return mRecyclerView;
     }
 
-    public void appendNews(List<NewsWireItem> news) {
+    public void appendNews(List<NewsItem> news) {
         mAdapter.addNews(news);
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
 
         private LayoutInflater mInflater;
-        private List<NewsWireItem> mNews;
+        private List<NewsItem> mNews;
 
-        public CustomAdapter(List<NewsWireItem> news) {
+        public CustomAdapter(List<NewsItem> news) {
             if (news != null) {
                 mNews = news;
             } else {
@@ -61,7 +60,7 @@ public class NewsWireFragment extends Fragment {
             mInflater = LayoutInflater.from(NewsWireFragment.this.getActivity());
         }
 
-        public void addNews(List<NewsWireItem> news) {
+        public void addNews(List<NewsItem> news) {
             if (!mNews.containsAll(news)) {
                 mNews.addAll(news);
                 notifyDataSetChanged();

@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import com.example.apokyn.mynewsreader.data.DataManager;
 import com.example.apokyn.mynewsreader.data.NewsWireListener;
-import com.example.apokyn.mynewsreader.entity.NewsWireItem;
+import com.example.apokyn.mynewsreader.entity.NewsItem;
 
 import java.util.List;
 
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements NewsWireListener 
     // NewsWireListener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onNewsUpdated(String section, List<NewsWireItem> freshNews) {
+    public void onNewsUpdated(String section, List<NewsItem> freshNews) {
         Toast.makeText(this, "All is OK", Toast.LENGTH_SHORT).show();
         mNewsWireFragment.appendNews(freshNews);
     }
