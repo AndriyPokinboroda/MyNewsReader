@@ -26,9 +26,22 @@ public class MainActivity extends AppCompatActivity {
         mDataManager = NewsReaderApplication.getDataManager();
         mNewsWireFragment =  new NewsWireFragment();
         mNewsWireFragment.setSection("all");
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mNewsWireFragment);
+        transaction.commit();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.remove(mNewsWireFragment);
         transaction.commit();
     }
 }

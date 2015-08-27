@@ -30,6 +30,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     private String mSection = "all";
     private DataManager mDataManager;
     private List<NewsItem> mNews;
+    private boolean isFirstTimeOnStart = true;
     private boolean loading = true;
 
     @Override
@@ -37,7 +38,6 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
 
         mDataManager = NewsReaderApplication.getDataManager();
-        onRefresh();
     }
 
     @Nullable
@@ -50,6 +50,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         mRecyclerView.setAdapter(mAdapter);
 
         mSwipeRefreshLayout = new SwipeRefreshLayout(getActivity());
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mSwipeRefreshLayout.addView(mRecyclerView);
 
@@ -79,7 +80,12 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onStart() {
         super.onStart();
 
-        mDataManager.registerNewsWireListener(this, false);
+        mDataManager.registerNewsWireListener(this);
+
+        if (isFirstTimeOnStart) {
+            isFirstTimeOnStart = false;
+            mDataManager.refreshNews(mSection);
+        }
     }
 
     @Override
@@ -98,6 +104,8 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     //----------------------------------------------------------------------------------------------
     @Override
     public void onRefresh() {
+        mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setEnabled(false);
         mDataManager.refreshNews(mSection);
     }
     //----------------------------------------------------------------------------------------------
@@ -108,6 +116,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         mNews = mDataManager.getNews(mSection);
         mAdapter.notifyDataSetChanged();
         mSwipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setEnabled(true);
         loading = true;
     }
 
@@ -115,6 +124,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onNewsUpdateFailed(String section, String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         mSwipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setEnabled(true);
         loading = true;
     }
     //----------------------------------------------------------------------------------------------

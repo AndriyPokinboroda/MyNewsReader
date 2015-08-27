@@ -96,7 +96,7 @@ public class NewsWireService extends IntentService {
         resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? errorMessage : null);
         resultIntent.putExtra(KEY_RESULT_JSON, (responseJSON != null) ? responseJSON : null);
         resultIntent.putExtra(KEY_SECTION, section);
-        requestIntent.putExtra(KEY_OVERRIDE, override);
+        resultIntent.putExtra(KEY_OVERRIDE, override);
 
         mBroadcastManager.sendBroadcast(resultIntent);
     }

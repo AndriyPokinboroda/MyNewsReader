@@ -50,7 +50,7 @@ public class DataManager {
     //----------------------------------------------------------------------------------------------
     // Observer
     //----------------------------------------------------------------------------------------------
-    public void registerNewsWireListener(NewsWireListener listener, boolean forceUpdate) { //TODO force update
+    public void registerNewsWireListener(NewsWireListener listener) {
         mNewsWireListeners.add(listener);
     }
 
@@ -74,7 +74,9 @@ public class DataManager {
     //----------------------------------------------------------------------------------------------
     public void refreshNews(String section) {
        performNewsWireRequest(
-               new NYTUrlBuilder.NewsWire().addSection(section).build(),
+               new NYTUrlBuilder.NewsWire()
+                       .addSection(section)
+                       .build(),
                section,
                true);
 
@@ -82,7 +84,10 @@ public class DataManager {
 
     public void appendNews(String section) {
         performNewsWireRequest(
-                new NYTUrlBuilder.NewsWire().addSection(section).setOffset(mNews.get(section).size()).build(),
+                new NYTUrlBuilder.NewsWire()
+                        .addSection(section)
+                        .setOffset(mNews.get(section).size())
+                        .build(),
                 section,
                 false);
     }
@@ -120,8 +125,7 @@ public class DataManager {
                 if (newsJSONObj != null) {
                     List<NewsItem> freshNews = Parser.parseNewsWireItems(newsJSONObj);
 
-                    boolean override;
-                    if (override  = intent.getBooleanExtra(NewsWireService.KEY_OVERRIDE, false)) {
+                    if (intent.getBooleanExtra(NewsWireService.KEY_OVERRIDE, false)) {
                         mNews.put(section, freshNews);
                     } else {
                         if (mNews.get(section) == null) {
@@ -129,9 +133,7 @@ public class DataManager {
                         }
                         mNews.get(section).addAll(freshNews);
                     }
-                    for (NewsItem item : freshNews) {
-                        Log.d(mLogTag, item.getTitle());
-                    }
+
                     notifyNewsWireUpdated(section);
                     return;
                 }
