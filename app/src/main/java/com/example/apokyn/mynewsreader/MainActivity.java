@@ -8,10 +8,11 @@ import android.widget.Toast;
 import com.example.apokyn.mynewsreader.data.DataManager;
 import com.example.apokyn.mynewsreader.data.NewsWireListener;
 import com.example.apokyn.mynewsreader.entity.NewsItem;
+import com.example.apokyn.mynewsreader.internet.NYTimesContract;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NewsWireListener {
+public class MainActivity extends AppCompatActivity {
 
     private final String mLogTag = getClass().getSimpleName();
     private DataManager mDataManager;
@@ -24,39 +25,10 @@ public class MainActivity extends AppCompatActivity implements NewsWireListener 
 
         mDataManager = NewsReaderApplication.getDataManager();
         mNewsWireFragment =  new NewsWireFragment();
+        mNewsWireFragment.setSection("all");
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mNewsWireFragment);
         transaction.commit();
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        mDataManager.registerNewsWireListener(this);
-        mDataManager.updateNewsWire(null);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        mDataManager.unregisterNewsWireListener(this);
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // NewsWireListener
-    //----------------------------------------------------------------------------------------------
-    @Override
-    public void onNewsUpdated(String section, List<NewsItem> freshNews) {
-        Toast.makeText(this, "All is OK", Toast.LENGTH_SHORT).show();
-        mNewsWireFragment.appendNews(freshNews);
-    }
-
-    @Override
-    public void onNewsUpdateFailed(String message) {
-        Toast.makeText(this, "Some error occurred : " + message, Toast.LENGTH_SHORT).show();
-    }
-    //----------------------------------------------------------------------------------------------
 }

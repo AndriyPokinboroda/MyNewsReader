@@ -52,9 +52,8 @@
 
             <ImageView
                 android:id="@+id/item_thumbnail"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_width="@dimen/thumbnail_news_size"
+                android:layout_height="@dimen/thumbnail_news_size"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"/>

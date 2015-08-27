@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface NewsWireListener {
 
-    void onNewsUpdated(String section, List<NewsItem> freshNews);
+    void onNewWireUpdated(String section);
 
-    void onNewsUpdateFailed(String message);
+    void onNewsUpdateFailed(String section, String message);
 }

@@ -14,12 +14,15 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 
-public class DownloadService extends IntentService {
+public class NewsWireService extends IntentService {
     /* Intent required extras */
     public static final String KEY_BROADCAST_ACTION = "broadcastAction";
     public static final String KEY_URL = "requestUrl";
+        /* For receivers */
+    public static final String KEY_SECTION = "section";
+    public static final String KEY_OVERRIDE = "override";
     /* Broadcast */
-    public static final String KEY_RESULT_JSON = "resultJSON";
+    public static final String KEY_RESULT_JSON = "resultList";
     public static final String KEY_IS_RESULT_OK = "isResultOk";
     public static final String KEY_ERROR_MESSAGE = "errorMessage";
 
@@ -27,11 +30,11 @@ public class DownloadService extends IntentService {
     private OkHttpClient mHttpClient;
     private LocalBroadcastManager mBroadcastManager;
 
-    public DownloadService() {
+    public NewsWireService() {
         this("Worker thread");
     }
 
-    public DownloadService(String name) {
+    public NewsWireService(String name) {
         super(name);
     }
 
@@ -49,10 +52,13 @@ public class DownloadService extends IntentService {
         Bundle requestExtras = requestIntent.getExtras();
         String requestUrl;
         String broadCastAction;
+        String section;
+        Boolean override = requestExtras.getBoolean(KEY_OVERRIDE);
 
         if ((requestUrl = requestExtras.getString(KEY_URL)) == null
-                ||(broadCastAction = requestExtras.getString(KEY_BROADCAST_ACTION)) == null) {
-            throw new IllegalArgumentException("Intent should contains not null broadcast action and url extras");
+                ||(broadCastAction = requestExtras.getString(KEY_BROADCAST_ACTION)) == null
+                ||(section = requestExtras.getString(KEY_SECTION)) == null) {
+            throw new IllegalArgumentException("Intent should contains not null broadcast action, url and section extras");
         }
         /* Perform request */
         Request request = new Request.Builder().url(requestUrl).build();
@@ -89,6 +95,8 @@ public class DownloadService extends IntentService {
         resultIntent.putExtra(KEY_IS_RESULT_OK, isSuccessful);
         resultIntent.putExtra(KEY_ERROR_MESSAGE, !isSuccessful ? errorMessage : null);
         resultIntent.putExtra(KEY_RESULT_JSON, (responseJSON != null) ? responseJSON : null);
+        resultIntent.putExtra(KEY_SECTION, section);
+        requestIntent.putExtra(KEY_OVERRIDE, override);
 
         mBroadcastManager.sendBroadcast(resultIntent);
     }
