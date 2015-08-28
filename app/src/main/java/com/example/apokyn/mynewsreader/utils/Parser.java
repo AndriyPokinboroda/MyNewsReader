@@ -1,5 +1,6 @@
 package com.example.apokyn.mynewsreader.utils;
 
+import android.text.Html;
 import android.util.Log;
 
 import com.example.apokyn.mynewsreader.internet.NYTimesContract;
@@ -50,10 +51,10 @@ public class Parser {
         }
 
         return new NewsItem(
-                jsonObject.optString(NYTimesContract.NewsWire.FIELD_TITLE),
+                Html.fromHtml(jsonObject.optString(NYTimesContract.NewsWire.FIELD_TITLE)).toString(),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_URL),
-                jsonObject.optString(NYTimesContract.NewsWire.FIELD_BYLINE),
-                jsonObject.optString(NYTimesContract.NewsWire.FIELD_ABSTRACT),
+                Html.fromHtml(jsonObject.optString(NYTimesContract.NewsWire.FIELD_BYLINE)).toString(),
+                Html.fromHtml(jsonObject.optString(NYTimesContract.NewsWire.FIELD_ABSTRACT)).toString(),
                 images);
     }
 

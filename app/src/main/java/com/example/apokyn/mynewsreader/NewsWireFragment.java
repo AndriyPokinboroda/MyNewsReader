@@ -2,7 +2,6 @@ package com.example.apokyn.mynewsreader;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,14 +9,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.apokyn.mynewsreader.data.DataManager;
 import com.example.apokyn.mynewsreader.data.NewsWireListener;
@@ -30,6 +28,7 @@ import java.util.List;
 
 public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, NewsWireListener {
 
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private NewsWireAdapter mAdapter;
@@ -38,12 +37,13 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     private DataManager mDataManager;
     private List<NewsItem> mNews;
 
-    private boolean isFirstTimeOnStart = true;
-    private boolean isAppending = false;
-    private int progressViewIndex = -1;
+    private boolean mIsFirstTimeOnStart = true;
+    private boolean mIsAppending = false;
+    private int mProgressViewIndex = -1;
+    private int mThumbnailSize;
 
-    private Typeface title;
-    private Typeface content;
+    private Typeface mTitleFont;
+    private Typeface mContentFont;
 
     @Override
     public void onAttach(Context context) {
@@ -57,6 +57,11 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mThumbnailSize = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimension(R.dimen.thumbnail_news_size),
+                getResources().getDisplayMetrics());
+
         mDataManager = NewsReaderApplication.getDataManager();
 
         mRecyclerView = new RecyclerView(getActivity());
@@ -80,8 +85,8 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
                 int totalItemCount = mRecyclerView.getLayoutManager().getItemCount();
                 int pastVisibleItems = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
 
-                if (!isAppending) {
-                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                if (!mIsAppending) {
+                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount && dy > 0) {
                         showAppendProgressBar(true);
                         mDataManager.appendNews(mSection);
                     }
@@ -96,12 +101,12 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onStart() {
         super.onStart();
 
-        title = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham-bold.ttf");
-        content = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham.ttf");
+        mTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham-bold.ttf");
+        mContentFont = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham.ttf");
         mDataManager.registerNewsWireListener(this);
 
-        if (isFirstTimeOnStart) {
-            isFirstTimeOnStart = false;
+        if (mIsFirstTimeOnStart) {
+            mIsFirstTimeOnStart = false;
             mDataManager.forceNewsUpdate(mSection);
         }
     }
@@ -133,7 +138,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         if (section == mSection) {
             if (mSwipeRefreshLayout.isRefreshing()) {
                 showRefreshProgressBar(false);
-            } else if (isAppending) {
+            } else if (mIsAppending) {
                 showAppendProgressBar(false);
             }
 
@@ -149,7 +154,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
 
             if (mSwipeRefreshLayout.isRefreshing()) {
                 showRefreshProgressBar(false);
-            } else if (isAppending) {
+            } else if (mIsAppending) {
                 showAppendProgressBar(false);
             }
 
@@ -164,14 +169,14 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void showAppendProgressBar(boolean appending) {
-        isAppending = appending;
+        mIsAppending = appending;
 
-        if (isAppending) {
+        if (mIsAppending) {
             mNews.add(null);
-            progressViewIndex = mNews.size() - 1;
-            mAdapter.notifyItemChanged(progressViewIndex);
+            mProgressViewIndex = mNews.size() - 1;
+            mAdapter.notifyItemChanged(mProgressViewIndex);
         } else {
-            mNews.remove(progressViewIndex);
+            mNews.remove(mProgressViewIndex);
         }
 
     }
@@ -214,9 +219,8 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
                 if (mNews.get(index).getPhotos() != null && mNews.get(index).getPhotos().size() != 0) {
                     Picasso.with(getActivity())
                             .load(mNews.get(index).getPhotos().get(0).getImageUrl())
+                            .resize(mThumbnailSize, mThumbnailSize)
                             .into(newsItemViewHolder.thumbnailView);
-                } else {
-                    newsItemViewHolder.thumbnailView.setMaxWidth(0);
                 }
             }
         }
@@ -246,9 +250,9 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
                 abstractView = (TextView) contentView.findViewById(R.id.item_abstract);
                 thumbnailView = (ImageView) contentView.findViewById(R.id.item_thumbnail);
 
-                titleView.setTypeface(title);
-                bylineView.setTypeface(content);
-                abstractView.setTypeface(content);
+                titleView.setTypeface(mTitleFont);
+                bylineView.setTypeface(mContentFont);
+                abstractView.setTypeface(mContentFont);
             }
         }
 

@@ -46,6 +46,12 @@ public class NewsWireService extends IntentService {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
     protected void onHandleIntent(Intent requestIntent) {
         /* Validate request data */
         String requestUrl;
