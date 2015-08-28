@@ -1,9 +1,12 @@
 package com.example.apokyn.mynewsreader;
 
 import android.app.FragmentTransaction;
+import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.example.apokyn.mynewsreader.data.DataManager;
 import com.example.apokyn.mynewsreader.data.NewsWireListener;
@@ -23,9 +26,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        TextView title = (TextView) findViewById(R.id.toolbar_title);
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "old_english.ttf");
+
+        title.setTypeface(custom_font);
         mDataManager = NewsReaderApplication.getDataManager();
         mNewsWireFragment =  new NewsWireFragment();
-        mNewsWireFragment.setSection("all");
+        mNewsWireFragment.setSection(NYTimesContract.Section.ALL);
     }
 
     @Override

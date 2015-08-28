@@ -16,6 +16,7 @@ import com.example.apokyn.mynewsreader.internet.NewsWireService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,27 +25,28 @@ import java.util.Map;
 
 public class DataManager {
 
-    private static final String BROADCAST_ACTION_NEWS_WIRE_UPDATE = "newsWireUpdate";
+    private static final String LOG_TAG = DataManager.class.getSimpleName();
 
-    private final String mLogTag = getClass().getSimpleName();
+    public static final String KEY_BROADCAST_ACTION = "broadcastAction";
+    public static final String KEY_SECTION = "section";
+    public static final String KEY_OVERRIDE = "override";
+
+    public static final String BROADCAST_ACTION_NEWS_WIRE_UPDATE = "newsWireUpdate";
 
     private Context mContext;
-    private BroadcastReceiver mNewsWireReceiver;
-    private LocalBroadcastManager mBroadcastManager;
     private List<NewsWireListener> mNewsWireListeners;
-
-    private Map<String, List<NewsItem>> mNews;
+    private Map<NYTimesContract.Section, List<NewsItem>> mNews;
 
     public DataManager(Context context) {
         mContext = context;
-        mNewsWireReceiver = new NewsWireResponseHandler();
-        mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
         mNewsWireListeners = new ArrayList<>();
         mNews = new HashMap<>();
 
-        mBroadcastManager.registerReceiver(
-                mNewsWireReceiver,
-                new IntentFilter(BROADCAST_ACTION_NEWS_WIRE_UPDATE));
+        LocalBroadcastManager
+                .getInstance(mContext)
+                .registerReceiver(
+                        new NewsWireResponseHandler(),
+                        new IntentFilter(BROADCAST_ACTION_NEWS_WIRE_UPDATE));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -58,13 +60,13 @@ public class DataManager {
         mNewsWireListeners.remove(listener);
     }
 
-    private void notifyNewsWireUpdated(String section) {
+    private void notifyNewsWireUpdated(NYTimesContract.Section section) {
         for (NewsWireListener listener : mNewsWireListeners) {
             listener.onNewWireUpdated(section);
         }
     }
 
-    private void notifyNewsWireUpdateFailed(String section, String message) {
+    private void notifyNewsWireUpdateFailed(NYTimesContract.Section section, String message) {
         for (NewsWireListener listener : mNewsWireListeners) {
             listener.onNewsUpdateFailed(section, message);
         }
@@ -72,37 +74,46 @@ public class DataManager {
     //----------------------------------------------------------------------------------------------
     // News Wire Updating
     //----------------------------------------------------------------------------------------------
-    public void refreshNews(String section) {
+    public void forceNewsUpdate(NYTimesContract.Section section) {
+        List<NewsItem> sectionNews = mNews.get(section);
+
+        if (sectionNews != null && sectionNews.size() != 0) {
+            notifyNewsWireUpdated(section);
+        } else {
+            refreshNews(section);
+        }
+    }
+
+    public void refreshNews(NYTimesContract.Section section) {
        performNewsWireRequest(
                new NYTUrlBuilder.NewsWire()
                        .addSection(section)
                        .build(),
-               section,
+               section.getValue(),
                true);
-
     }
 
-    public void appendNews(String section) {
+    public void appendNews(NYTimesContract.Section section) {
         performNewsWireRequest(
                 new NYTUrlBuilder.NewsWire()
                         .addSection(section)
                         .setOffset(mNews.get(section).size())
                         .build(),
-                section,
+                section.getValue(),
                 false);
     }
 
-    public List<NewsItem> getNews(String section) {
+    public List<NewsItem> getNews(NYTimesContract.Section section) {
         return mNews.get(section);
     }
 
     private void performNewsWireRequest(String url, String section, boolean override) {
         Intent requestIntent = new Intent(mContext, NewsWireService.class);
 
-        requestIntent.putExtra(NewsWireService.KEY_BROADCAST_ACTION, BROADCAST_ACTION_NEWS_WIRE_UPDATE);
+        requestIntent.putExtra(KEY_BROADCAST_ACTION, BROADCAST_ACTION_NEWS_WIRE_UPDATE);
         requestIntent.putExtra(NewsWireService.KEY_URL, url);
-        requestIntent.putExtra(NewsWireService.KEY_SECTION, section);
-        requestIntent.putExtra(NewsWireService.KEY_OVERRIDE, override);
+        requestIntent.putExtra(KEY_SECTION, section);
+        requestIntent.putExtra(KEY_OVERRIDE, override);
 
         mContext.startService(requestIntent);
     }
@@ -111,35 +122,50 @@ public class DataManager {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String section = intent.getStringExtra(NewsWireService.KEY_SECTION);
+            String errorMessage;
+            NYTimesContract.Section section =
+                    NYTimesContract.Section.getSection(
+                            intent.getStringExtra(KEY_SECTION));
 
-            if (intent.getBooleanExtra(NewsWireService.KEY_IS_RESULT_OK, false)) {
-                JSONObject newsJSONObj = null;
+            if (section != null) {
+                errorMessage = intent.getStringExtra(NewsWireService.KEY_ERROR_MESSAGE);
+                boolean isSuccessful = (errorMessage == null);
 
-                try {
-                    newsJSONObj = new JSONObject(intent.getStringExtra(NewsWireService.KEY_RESULT_JSON));
-                } catch (JSONException e) {
-                    Log.d(mLogTag, e.getMessage());
-                }
+                if (isSuccessful) {
+                    JSONObject newsJSONObj = null;
 
-                if (newsJSONObj != null) {
-                    List<NewsItem> freshNews = Parser.parseNewsWireItems(newsJSONObj);
-
-                    if (intent.getBooleanExtra(NewsWireService.KEY_OVERRIDE, false)) {
-                        mNews.put(section, freshNews);
-                    } else {
-                        if (mNews.get(section) == null) {
-                            mNews.put(section, new ArrayList<NewsItem>());
-                        }
-                        mNews.get(section).addAll(freshNews);
+                    try {
+                        newsJSONObj = new JSONObject(
+                                intent.getStringExtra(NewsWireService.KEY_RESULT_JSON));
+                    } catch (JSONException e) {
+                        Log.d(LOG_TAG, e.getMessage());
                     }
 
-                    notifyNewsWireUpdated(section);
-                    return;
+                    if (newsJSONObj != null) {
+                        List<NewsItem> freshNews = Parser.parseNewsWireItems(newsJSONObj);
+                        boolean override = intent.getBooleanExtra(KEY_OVERRIDE, false);
+
+                        if (override) {
+                            mNews.put(section, freshNews);
+                        } else {
+                            if (mNews.get(section) == null) {
+                                mNews.put(section, new ArrayList<NewsItem>());
+                            }
+
+                            mNews.get(section).addAll(freshNews);
+                        }
+
+                        notifyNewsWireUpdated(section);
+                        return;
+                    } else {
+                        errorMessage = "Internal error";
+                    }
                 }
+            } else {
+                errorMessage = "Internal error";
             }
 
-            notifyNewsWireUpdateFailed(section, intent.getStringExtra(NewsWireService.KEY_ERROR_MESSAGE));
+            notifyNewsWireUpdateFailed(section, errorMessage);
         }
     }
     //----------------------------------------------------------------------------------------------

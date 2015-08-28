@@ -1,6 +1,7 @@
 package com.example.apokyn.mynewsreader.data;
 
 import com.example.apokyn.mynewsreader.entity.NewsItem;
+import com.example.apokyn.mynewsreader.internet.NYTimesContract;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface NewsWireListener {
 
-    void onNewWireUpdated(String section);
+    void onNewWireUpdated(NYTimesContract.Section section);
 
-    void onNewsUpdateFailed(String section, String message);
+    void onNewsUpdateFailed(NYTimesContract.Section section, String message);
 }

@@ -18,15 +18,15 @@ import java.util.List;
  */
 public class Parser {
 
-    private static final String LOG_TAG = "Parser";
+    private static final String LOG_TAG = Parser.class.getSimpleName();
 
     private Parser() { }
 
     public static List<NewsItem> parseNewsWireItems(JSONObject jsonObject) {
-        JSONArray newsWireItems = null;
         List<NewsItem> resultItems = new ArrayList<>();
+
         try {
-            newsWireItems = jsonObject.getJSONArray(NYTimesContract.NewsWire.FIELD_RESULTS);
+            JSONArray newsWireItems = jsonObject.getJSONArray(NYTimesContract.NewsWire.FIELD_RESULTS);
 
             if (newsWireItems != null) {
                 for (int i = 0; i < newsWireItems.length(); i++) {
@@ -34,7 +34,7 @@ public class Parser {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.d(LOG_TAG, e.getMessage());
         }
 
         return resultItems;
@@ -42,17 +42,19 @@ public class Parser {
 
     public static NewsItem parseNewsWireItem(JSONObject jsonObject) {
         List<Image> images = null;
+
         try {
             images = parseImages(jsonObject.getJSONArray(NYTimesContract.Multimedia.FIELD_MULTIMEDIA));
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.d(LOG_TAG, e.getMessage());
         }
+
         return new NewsItem(
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_TITLE),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_URL),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_BYLINE),
                 jsonObject.optString(NYTimesContract.NewsWire.FIELD_ABSTRACT),
-                (images != null && images.size() > 0) ? images.get(0) : null);
+                images);
     }
 
     public static List<Image> parseImages(JSONArray jsonArray){
@@ -68,11 +70,11 @@ public class Parser {
 
         return images;
     }
+
     public static Image parseImage(JSONObject jsonObject) {
         return new Image(
-                jsonObject.optString("url"),
-                jsonObject.optString("caption"),
-                jsonObject.optString("copyright"));
-
+                jsonObject.optString(NYTimesContract.Multimedia.FIELD_URL),
+                jsonObject.optString(NYTimesContract.Multimedia.FIELD_CAPTION),
+                jsonObject.optString(NYTimesContract.Multimedia.FIELD_COPYRIGHT));
     }
 }

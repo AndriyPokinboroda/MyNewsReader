@@ -5,18 +5,18 @@ package com.example.apokyn.mynewsreader.entity;
  */
 public class Image {
 
-    private String mImage;
+    private String mImageUrl;
     private String mCapture;
     private String mCopyright;
 
-    public Image(String image, String capture, String copyright) {
-        mImage = image;
+    public Image(String imageUrl, String capture, String copyright) {
+        mImageUrl = imageUrl;
         mCapture = capture;
         mCopyright = copyright;
     }
 
-    public String getImage() {
-        return mImage;
+    public String getImageUrl() {
+        return mImageUrl;
     }
 
     public String getCapture() {

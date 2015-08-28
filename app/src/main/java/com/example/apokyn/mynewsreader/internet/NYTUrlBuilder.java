@@ -1,37 +1,31 @@
 package com.example.apokyn.mynewsreader.internet;
 
-import android.support.annotation.NonNull;
-import android.text.TextUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by apokyn on 26.08.2015.
  */
 public class NYTUrlBuilder {
     public static class NewsWire {
 
-        private List<String> mSections;
-        private String mSource;
+        private NYTimesContract.Section mSections;
+        private NYTimesContract.Source mSource;
         private int mTimePeriod;
         private int mLimit;
         private int mOffset;
 
         public NewsWire(){
-            mSections = new ArrayList<>();
-            mSource = NYTimesContract.NewsWire.SOURCE_ALL;
+            mSections = NYTimesContract.Section.ALL;
+            mSource = NYTimesContract.Source.ALL;
             mTimePeriod = NYTimesContract.NewsWire.TIME_PERIOD_DEFAULT;
             mLimit = NYTimesContract.NewsWire.LIMIT_DEFAULT;
             mOffset = NYTimesContract.NewsWire.OFFSET_DEFAULT;
         }
 
-        public NewsWire addSection(@NonNull String section) { //TODO section validation
-            mSections.add(section);
+        public NewsWire addSection(NYTimesContract.Section section) {
+            mSections = section;
             return this;
         }
 
-        public NewsWire setSource(String source) { //TODO source validation
+        public NewsWire setSource(NYTimesContract.Source source) {
             mSource = source;
             return this;
         }
@@ -65,7 +59,7 @@ public class NYTUrlBuilder {
         public NewsWire setOffset(int offset) {
             if (offset < NYTimesContract.NewsWire.OFFSET_MIN) {
                 throw new IllegalArgumentException(
-                        "The offset attr should be grater then"
+                        "The offset attr should be grater then "
                         + NYTimesContract.NewsWire.OFFSET_MIN);
             }
 
@@ -77,11 +71,9 @@ public class NYTUrlBuilder {
 
             return new StringBuilder()
                     .append(NYTimesContract.NewsWire.BASE_URL)
-                    .append(mSource)
+                    .append(mSource.getValue())
                     .append("/")
-                    .append((mSections.size() == 0)
-                            ? NYTimesContract.NewsWire.SECTION_ALL
-                            : TextUtils.join(",", mSections))
+                    .append(mSections.getValue())
                     .append("/")
                     .append(mTimePeriod)
                     .append(NYTimesContract.RESPONSE_FORMAT_JSON)

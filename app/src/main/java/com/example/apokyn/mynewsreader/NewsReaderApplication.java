@@ -11,7 +11,6 @@ public class NewsReaderApplication extends Application {
 
     private static DataManager sDataManager;
 
-
     @Override
     public void onCreate() {
         super.onCreate();

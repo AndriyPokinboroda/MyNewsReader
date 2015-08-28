@@ -7,8 +7,50 @@ public class NYTimesContract {
 
     public static final String BASE_URL = "http://api.nytimes.com/svc/";
     public static final String RESPONSE_FORMAT_JSON = ".json";
-
     public static final String PARAMETER_API_KEY = "api-key";
+
+    public enum Section {
+        ALL("all"),
+        ARTS("Arts"),
+        BOOKS("Books"),
+        BUSINESS("Business"),
+        EDUCATION("Education"),
+        HEALTH("Health");
+
+        private String mSection;
+
+        Section(String section) {
+            mSection = section;
+        }
+
+        public static Section getSection(String section) {
+            for (Section availableSection : Section.values()) {
+                if (availableSection.mSection.equals(section)) {
+                    return availableSection;
+                }
+            }
+            return null;
+        }
+        public String getValue() {
+            return mSection;
+        }
+    }
+
+    public enum Source {
+        ALL("all"),
+        NEW_YORK_TIMES("nyt"),
+        INTERNATIONAL_HERALD_TRIBUNE("iht");
+
+        private String mSources;
+
+        Source(String source) {
+            mSources = source;
+        }
+
+        public String getValue() {
+            return mSources;
+        }
+    }
 
     public static class NewsWire {
         //------------------------------------------------------------------------------------------
@@ -16,21 +58,12 @@ public class NYTimesContract {
         // Curly braces {} indicate required items.
         // Square brackets [] indicate optional items or placeholders.
         //
-        // http://api.nytimes.com/svc/news/
-        // {version}/content/{source}/{section}[/time-period][.response-format]?
-        // [parameter1=value1& ... &]api-key={your-API-key}
+        // http://api.nytimes.com/svc/
+        // news/{version}/content/{source}/{section}[/time-period][.response-format]
+        // ?[parameter1=value1& ... &]api-key={your-API-key}
         //------------------------------------------------------------------------------------------
 
         /* for building url */
-            /* Some available values for section  */
-        public static final String SECTION_ALL = "all";
-            //TODO add some available sections
-
-            /* Available values for source */
-        public static final String SOURCE_ALL = "all";
-        public static final String SOURCE_NEW_YORK_TIMES_= "nyt";
-        public static final String SOURCE_INTERATIONAL_HERALD_TRIBUNE = "iht";
-
             /* Time period attribute (measure in hour) */
         public static final String PARAMETER_TIME_PERIOD = "time-period";
         public static final int TIME_PERIOD_MIN = 1;
@@ -43,7 +76,7 @@ public class NYTimesContract {
         public static final int LIMIT_MAX = 20;
         public static final int LIMIT_DEFAULT = 20;
 
-            /* Offset - starting point of the result set (The max limit is the count of available records)*/
+            /* Offset - starting point of the result set (The max limit is the count of available records) */
         public static final String PARAMETER_OFFSET = "offset";
         public static final int OFFSET_MIN = 0;
         public static final int OFFSET_DEFAULT = 0;
@@ -59,11 +92,12 @@ public class NYTimesContract {
         public static final String FIELD_URL = "url";
         public static final String FIELD_BYLINE = "byline";
         public static final String FIELD_RESULTS = "results";
-
     }
 
     public static class Multimedia {
         public static final String FIELD_MULTIMEDIA = "multimedia";
-
+        public static final String FIELD_URL = "url";
+        public static final String FIELD_CAPTION = "caption";
+        public static final String FIELD_COPYRIGHT = "copyright";
     }
 }
