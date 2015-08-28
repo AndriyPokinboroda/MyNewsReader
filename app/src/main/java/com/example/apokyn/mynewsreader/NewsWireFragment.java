@@ -2,13 +2,16 @@ package com.example.apokyn.mynewsreader;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,7 @@ import java.util.List;
 
 public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, NewsWireListener {
 
+    private static final String KEY_SAVED_OFFSET = "listOffset";
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
@@ -94,21 +98,41 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         });
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_SAVED_OFFSET)) {
+            mRecyclerView.scrollToPosition(savedInstanceState.getInt(KEY_SAVED_OFFSET));
+        }
+
         return mSwipeRefreshLayout;
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Log.d("Tag", ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition() + "");
+        outState.putInt(KEY_SAVED_OFFSET, ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        mTitleFont = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham-bold.ttf");
-        mContentFont = Typeface.createFromAsset(getActivity().getAssets(), "cheltenham.ttf");
         mDataManager.registerNewsWireListener(this);
 
         if (mIsFirstTimeOnStart) {
             mIsFirstTimeOnStart = false;
             mDataManager.forceNewsUpdate(mSection);
         }
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int offset = preferences.getInt(KEY_SAVED_OFFSET, 0);
+
+        mRecyclerView.scrollToPosition(offset);
     }
 
     @Override
@@ -116,6 +140,11 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         super.onStop();
 
         mDataManager.unregisterNewsWireListener(this);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+        editor.putInt(KEY_SAVED_OFFSET, ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+        editor.apply();
+
+        Log.d("Tag", "" + ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
     }
 
     public void setSection(NYTimesContract.Section section) {
