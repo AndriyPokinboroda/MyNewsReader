@@ -28,12 +28,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="8dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="8"
+                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
@@ -46,6 +47,7 @@
                     android:id="@+id/item_abstract"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     style="@style/TextContent"/>
 
             </LinearLayout>
@@ -55,8 +57,8 @@
                 android:layout_width="@dimen/thumbnail_news_size"
                 android:layout_height="@dimen/thumbnail_news_size"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="4dp"
-                android:layout_marginStart="4dp"/>
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"/>
 
         </LinearLayout>
 

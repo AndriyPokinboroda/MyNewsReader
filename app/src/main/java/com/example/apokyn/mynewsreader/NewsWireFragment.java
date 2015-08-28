@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mSwipeRefreshLayout.addView(mRecyclerView);
+        mSwipeRefreshLayout.setColorSchemeColors(R.color.blue_gray_400);
 
         mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -170,6 +172,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int index) {
             if (viewHolder instanceof ProgressViewHolder) {
+                ((ProgressViewHolder) viewHolder).progressBar.getIndeterminateDrawable().setColorFilter(0xF000000, android.graphics.PorterDuff.Mode.MULTIPLY);
                 ((ProgressViewHolder) viewHolder).progressBar.setIndeterminate(true);
             } else {
                 NewsItemViewHolder newsItemViewHolder = (NewsItemViewHolder) viewHolder;
@@ -177,10 +180,12 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
                 newsItemViewHolder.bylineView.setText(mNews.get(index).getByline());
                 newsItemViewHolder.abstractView.setText(mNews.get(index).getAbstract());
 
-                if (mNews.get(index).getPhotos() != null && mNews.get(index).getPhotos().size() == 0) {
+                if (mNews.get(index).getPhotos() != null && mNews.get(index).getPhotos().size() != 0) {
                     Picasso.with(getActivity())
                             .load(mNews.get(index).getPhotos().get(0).getImageUrl())
                             .into(newsItemViewHolder.thumbnailView);
+                } else {
+                    newsItemViewHolder.thumbnailView.setMaxWidth(0);
                 }
             }
         }
