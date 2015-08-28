@@ -1,9 +1,12 @@
 package com.example.apokyn.mynewsreader;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,26 +33,32 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private NewsWireAdapter mAdapter;
-    private NYTimesContract.Section mSection = NYTimesContract.Section.ALL;
+
+    private NYTimesContract.Section mSection = null;
     private DataManager mDataManager;
     private List<NewsItem> mNews;
-    private boolean isFirstTimeOnStart = true;
-    private boolean loading = true;
-    private int progresViewIndex = -1;
 
-    Typeface title;
-    Typeface content;
+    private boolean isFirstTimeOnStart = true;
+    private boolean isAppending = false;
+    private int progressViewIndex = -1;
+
+    private Typeface title;
+    private Typeface content;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        mDataManager = NewsReaderApplication.getDataManager();
+        if (mSection == null) {
+            throw new IllegalStateException("Should set section before display fragment");
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mDataManager = NewsReaderApplication.getDataManager();
+
         mRecyclerView = new RecyclerView(getActivity());
         mAdapter = new NewsWireAdapter();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
@@ -69,15 +78,12 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
 
                 int visibleItemCount = mRecyclerView.getLayoutManager().getChildCount();
                 int totalItemCount = mRecyclerView.getLayoutManager().getItemCount();
-                int pastVisiblesItems = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+                int pastVisibleItems = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
 
-                if (loading) {
-                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
-                        loading = false;
+                if (!isAppending) {
+                    if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                        showAppendProgressBar(true);
                         mDataManager.appendNews(mSection);
-                        mNews.add(null);
-                        progresViewIndex = mNews.size() - 1;
-                        mAdapter.notifyItemChanged(progresViewIndex);
                     }
                 }
             }
@@ -116,8 +122,7 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     //----------------------------------------------------------------------------------------------
     @Override
     public void onRefresh() {
-        mSwipeRefreshLayout.setRefreshing(true);
-        mSwipeRefreshLayout.setEnabled(false);
+        showRefreshProgressBar(true);
         mDataManager.refreshNews(mSection);
     }
     //----------------------------------------------------------------------------------------------
@@ -125,27 +130,51 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
     //----------------------------------------------------------------------------------------------
     @Override
     public void onNewWireUpdated(NYTimesContract.Section section) {
-        if (mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.setRefreshing(false);
-            mSwipeRefreshLayout.setEnabled(true);
-        } else {
-            if (progresViewIndex != -1) {
-                mNews.remove(progresViewIndex);
+        if (section == mSection) {
+            if (mSwipeRefreshLayout.isRefreshing()) {
+                showRefreshProgressBar(false);
+            } else if (isAppending) {
+                showAppendProgressBar(false);
             }
-            loading = true;
+
+            mNews = mDataManager.getNews(mSection);
+            mAdapter.notifyDataSetChanged();
         }
-        mNews = mDataManager.getNews(mSection);
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onNewsUpdateFailed(NYTimesContract.Section section, String message) {
-        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-        mSwipeRefreshLayout.setRefreshing(false);
-        mSwipeRefreshLayout.setEnabled(true);
-        loading = true;
+        if (section == mSection) {
+            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
+
+            if (mSwipeRefreshLayout.isRefreshing()) {
+                showRefreshProgressBar(false);
+            } else if (isAppending) {
+                showAppendProgressBar(false);
+            }
+
+            mAdapter.notifyDataSetChanged();
+        }
     }
     //----------------------------------------------------------------------------------------------
+
+    private void showRefreshProgressBar(boolean isRefreshing) {
+        mSwipeRefreshLayout.setRefreshing(isRefreshing);
+        mSwipeRefreshLayout.setEnabled(!isRefreshing);
+    }
+
+    private void showAppendProgressBar(boolean appending) {
+        isAppending = appending;
+
+        if (isAppending) {
+            mNews.add(null);
+            progressViewIndex = mNews.size() - 1;
+            mAdapter.notifyItemChanged(progressViewIndex);
+        } else {
+            mNews.remove(progressViewIndex);
+        }
+
+    }
     private class NewsWireAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private static final int VIEW_PROG = -1;
@@ -172,8 +201,10 @@ public class NewsWireFragment extends Fragment implements SwipeRefreshLayout.OnR
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int index) {
             if (viewHolder instanceof ProgressViewHolder) {
-                ((ProgressViewHolder) viewHolder).progressBar.getIndeterminateDrawable().setColorFilter(0xF000000, android.graphics.PorterDuff.Mode.MULTIPLY);
-                ((ProgressViewHolder) viewHolder).progressBar.setIndeterminate(true);
+                ProgressViewHolder progressViewHolder = (ProgressViewHolder) viewHolder;
+                progressViewHolder.progressBar.getIndeterminateDrawable()
+                        .setColorFilter(0xF000000, android.graphics.PorterDuff.Mode.MULTIPLY);
+                progressViewHolder.progressBar.setIndeterminate(true);
             } else {
                 NewsItemViewHolder newsItemViewHolder = (NewsItemViewHolder) viewHolder;
                 newsItemViewHolder.titleView.setText(mNews.get(index).getTitle());

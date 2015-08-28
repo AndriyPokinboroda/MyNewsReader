@@ -85,7 +85,6 @@ public class NewsWireService extends IntentService {
         /* Build response intent */
         Intent resultIntent = new Intent(requestIntent.getStringExtra(DataManager.KEY_BROADCAST_ACTION));
 
-        resultIntent.putExtra(DataManager.KEY_OVERRIDE, requestIntent.getStringExtra(DataManager.KEY_OVERRIDE));
         resultIntent.putExtra(DataManager.KEY_SECTION, requestIntent.getStringExtra(DataManager.KEY_SECTION));
         resultIntent.putExtra(DataManager.KEY_OVERRIDE, requestIntent.getBooleanExtra(DataManager.KEY_OVERRIDE, false));
         resultIntent.putExtra(KEY_ERROR_MESSAGE, errorMessage);
